@@ -1,0 +1,22 @@
+# Root
+.DS_Store
+.env
+.env.*
+*.log
+
+# Node
+npm-debug.log*
+**/node_modules/
+
+**/dist/
+**/build/
+
+# Optional: IDE/editor settings
+.vscode/
+.idea/
+*.swp
+*.sublime*
+
+# OS-specific
+Thumbs.db
+Desktop.ini

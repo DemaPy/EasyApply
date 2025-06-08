@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  emailVerified Boolean        @default(false)
+  provider      Provider
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  contexts      Context?
+  resumes       Resume[]
+  secrets       Secrets?
+  balance       UserBalance?
+  purchase      UserPurchase[]
+
+  @@index([id])
+}
+
+model UserBalance {
+  id      String @id @default(cuid())
+  userId  String @unique
+  credits Int    @default(0)
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model UserPurchase {
+  id          String   @id @default(cuid())
+  userId      String
+  stripeId    String
+  description String
+  amount      Int
+  currency    String
+  date        DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([id])
+}
+
+model Secrets {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  password          String?
+  refreshToken      String?
+  verificationToken String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([id])
+}
+
+model Context {
+  id        String   @id @default(uuid())
+  title     String
+  sections  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Resume    Resume[]
+
+  @@index([id])
+}
+
+model Template {
+  id        String   @id @default(uuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Resume    Resume[]
+
+  @@index([id])
+}
+
+model Resume {
+  id             String   @id @default(uuid())
+  title          String
+  contextId      String
+  createdAt      DateTime @default(now())
+  jobDescription String
+  resume         String
+  templateId     String
+  updatedAt      DateTime @updatedAt
+  userId         String
+  Context        Context  @relation(fields: [contextId], references: [id])
+  Template       Template @relation(fields: [templateId], references: [id])
+  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([id])
+}
+
+enum Provider {
+  email
+  google
+}
